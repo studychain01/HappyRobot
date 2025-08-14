@@ -1,0 +1,16 @@
+[
+    {
+      "id": "L-2025-0001",
+      "posted_at": "2025-08-14T10:00:00Z",
+      "origin": { "city": "Fresno", "state": "CA", "lat": 36.7378, "lon": -119.7871 },
+      "destination": { "city": "Reno", "state": "NV", "lat": 39.5296, "lon": -119.8138 },
+      "pickup_date": "2025-08-16",
+      "delivery_date": "2025-08-17",
+      "equipment_type": "Reefer",
+      "weight_lbs": 42000,
+      "price_usd": 1800,
+      "status": "available",
+      "notes": "No lumper, FCFS"
+    }
+  ]
+  
