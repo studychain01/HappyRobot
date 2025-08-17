@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-API_KEY = os.getenv("LOADS_API_KEY", "devkey")  # set in env for prod
+API_KEY = os.getenv("LOADS_API_KEY", "mysecret")
 DATA_PATH = os.getenv("LOADS_DATA_PATH", "loads.json")
 
 app = FastAPI(title="Loads API", version="1.0")
