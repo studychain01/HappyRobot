@@ -252,12 +252,32 @@ def receive_extraction_webhook(payload: WebhookPayload, x_api_key: Optional[str]
     
     # Create conversation summary from available data
     summary_parts = []
+    
+    # Use transcript (limit to 300 chars for readability)
     if payload.transcript:
-        summary_parts.append(f"Transcript: {payload.transcript[:200]}...")
+        transcript_summary = payload.transcript[:300]
+        if len(payload.transcript) > 300:
+            transcript_summary += "..."
+        summary_parts.append(transcript_summary)
+    
+    # Add classification if available
     if payload.classification:
-        summary_parts.append(f"Classification: {payload.classification}")
+        summary_parts.append(f"[{payload.classification}]")
+    
+    # Add intent if available
     if payload.intent:
         summary_parts.append(f"Intent: {payload.intent}")
+    
+    # If no transcript, create summary from other fields (excluding customer name)
+    if not payload.transcript:
+        if payload.pickup_location and payload.delivery_location:
+            summary_parts.append(f"Route: {payload.pickup_location} → {payload.delivery_location}")
+        if payload.equipment_type:
+            summary_parts.append(f"Equipment: {payload.equipment_type}")
+        if payload.rate_mentioned:
+            summary_parts.append(f"Rate: {payload.rate_mentioned}")
+        if payload.call_type:
+            summary_parts.append(f"{payload.call_type} call")
     
     conversation_summary = " | ".join(summary_parts) if summary_parts else "Webhook data received"
     
