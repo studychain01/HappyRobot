@@ -105,6 +105,7 @@ class ConversationData(BaseModel):
     customer_name: Optional[str] = None
     customer_phone: Optional[str] = None
     customer_email: Optional[str] = None
+    mc_number: Optional[str] = None
     conversation_summary: str
     load_requirements: Optional[str] = None
     equipment_needed: Optional[str] = None
@@ -136,6 +137,7 @@ class WebhookPayload(BaseModel):
     customer_phone: Optional[str] = None
     customer_email: Optional[str] = None
     customer_company: Optional[str] = None
+    mc_number: Optional[str] = None
     
     # Load/shipping related extracted data
     pickup_location: Optional[str] = None
@@ -318,6 +320,7 @@ def receive_extraction_webhook(payload: WebhookPayload, x_api_key: Optional[str]
         customer_name=payload.customer_name or payload.customer_company,
         customer_phone=payload.customer_phone,
         customer_email=payload.customer_email,
+        mc_number=payload.mc_number,
         conversation_summary=conversation_summary,
         load_requirements=f"{payload.load_weight or ''} {payload.commodity_type or ''}".strip() or None,
         equipment_needed=payload.equipment_type,

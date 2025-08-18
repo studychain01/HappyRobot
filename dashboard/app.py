@@ -200,6 +200,8 @@ with tab2:
                         st.write(f"📞 **Phone:** {conv.get('customer_phone')}")
                     if conv.get('customer_email'):
                         st.write(f"📧 **Email:** {conv.get('customer_email')}")
+                    if conv.get('mc_number'):
+                        st.write(f"🚛 **MC Number:** {conv.get('mc_number')}")
                     
                     # Load booking status - check agent_notes first, then direct field
                     load_status = None
