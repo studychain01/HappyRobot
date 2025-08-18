@@ -146,6 +146,7 @@ class WebhookPayload(BaseModel):
     load_weight: Optional[str] = None
     commodity_type: Optional[str] = None
     rate_mentioned: Optional[str] = None
+    miles: Optional[int] = None
     
     # AI analysis results
     sentiment: Optional[str] = None
@@ -325,7 +326,8 @@ def receive_extraction_webhook(payload: WebhookPayload, x_api_key: Optional[str]
         customer_priority=payload.priority_level or "medium",
         follow_up_needed=payload.follow_up_required or False,
         agent_notes=agent_notes,
-        timestamp=payload.call_timestamp or datetime.now().isoformat()
+        timestamp=payload.call_timestamp or datetime.now().isoformat(),
+        miles=payload.miles
     )
     
     # Save to conversations

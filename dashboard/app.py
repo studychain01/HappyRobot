@@ -220,6 +220,9 @@ with tab2:
                     if conv.get('equipment_needed'):
                         st.write(f"**Equipment:** {conv.get('equipment_needed')}")
                     
+                    if conv.get('miles'):
+                        st.write(f"🛣️ **Miles:** {conv.get('miles'):,}")
+                    
                     if conv.get('rate_discussed'):
                         st.write(f"**Rate Discussed:** ${conv.get('rate_discussed'):,}")
                     
