@@ -1,7 +1,7 @@
 import os, requests, pandas as pd, streamlit as st
 
 # Try local API first, fall back to remote if needed
-API_BASE = os.getenv("API_BASE", "http://localhost:8000")
+API_BASE = os.getenv("API_BASE", "https://happyrobot-trucking-loadsapi.onrender.com")
 API_KEY = os.getenv("API_KEY", "mysecret")
 
 # Set page config
