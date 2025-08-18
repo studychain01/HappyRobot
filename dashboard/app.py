@@ -186,9 +186,6 @@ with tab2:
                 col1, col2 = st.columns([2, 1])
                 
                 with col1:
-                    st.write("**Summary:**")
-                    st.write(conv.get('conversation_summary', 'No summary available'))
-                    
                     if conv.get('load_requirements'):
                         st.write("**Load Requirements:**")
                         st.write(conv.get('load_requirements'))
@@ -204,10 +201,16 @@ with tab2:
                     if conv.get('customer_email'):
                         st.write(f"📧 **Email:** {conv.get('customer_email')}")
                     
-                    # Priority badge
-                    priority = conv.get('customer_priority', 'medium')
-                    priority_colors = {"high": "🔴", "medium": "🟡", "low": "🟢"}
-                    st.write(f"**Priority:** {priority_colors.get(priority, '⚪')} {priority.title()}")
+                    # Load booking status
+                    if conv.get('agent_notes') and 'Load Status:' in conv.get('agent_notes', ''):
+                        import re
+                        status_match = re.search(r'Load Status: (\w+)', conv.get('agent_notes', ''))
+                        if status_match:
+                            status = status_match.group(1).lower()
+                            if status == 'successful':
+                                st.write("✅ **Load: BOOKED**")
+                            elif status == 'not':  # "not successful"
+                                st.write("❌ **Load: NOT BOOKED**")
                     
                     # Load details
                     if conv.get('pickup_location') or conv.get('delivery_location'):

@@ -147,6 +147,7 @@ class WebhookPayload(BaseModel):
     commodity_type: Optional[str] = None
     rate_mentioned: Optional[str] = None
     miles: Optional[int] = None
+    load_classification: Optional[str] = None  # "successful" or "not successful"
     
     # AI analysis results
     sentiment: Optional[str] = None
@@ -296,6 +297,8 @@ def receive_extraction_webhook(payload: WebhookPayload, x_api_key: Optional[str]
     
     # Build agent notes from AI analysis
     agent_notes_parts = []
+    if payload.load_classification:
+        agent_notes_parts.append(f"Load Status: {payload.load_classification.title()}")
     if payload.sentiment:
         agent_notes_parts.append(f"Sentiment: {payload.sentiment}")
     if payload.follow_up_reason:
