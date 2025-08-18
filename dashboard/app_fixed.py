@@ -201,20 +201,16 @@ with tab2:
                     if conv.get('customer_email'):
                         st.write(f"📧 **Email:** {conv.get('customer_email')}")
                     
-                    # Load booking status - check agent_notes first, then direct field
-                    load_status = None
+                    # Load booking status
                     if conv.get('agent_notes') and 'Load Status:' in conv.get('agent_notes', ''):
                         import re
                         status_match = re.search(r'Load Status: (\w+)', conv.get('agent_notes', ''))
                         if status_match:
-                            load_status = status_match.group(1).lower()
-                    
-                    # Display load classification status
-                    if load_status:
-                        if load_status in ['successful', 'successfull']:
-                            st.write("✅ **Load: BOOKED**")
-                        elif load_status in ['not', 'unsuccessful', 'unsucessfull']:
-                            st.write("❌ **Load: NOT BOOKED**")
+                            status = status_match.group(1).lower()
+                            if status == 'successful':
+                                st.write("✅ **Load: BOOKED**")
+                            elif status == 'not':  # "not successful"
+                                st.write("❌ **Load: NOT BOOKED**")
                     
                     # Load details
                     if conv.get('pickup_location') or conv.get('delivery_location'):
