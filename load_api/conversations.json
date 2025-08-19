@@ -1,0 +1,18 @@
+[
+  {
+    "conversation_id": "conv_20250819_001",
+    "customer_name": "Smith Trucking LLC",
+    "customer_phone": "+1-555-123-4567",
+    "customer_email": "dispatch@smithtrucking.com",
+    "mc_number": "070208",
+    "pickup_location": "Los Angeles, California",
+    "delivery_location": "San Francisco, California",
+    "equipment_needed": "Dry Van",
+    "rate_discussed": 950,
+    "miles": 380,
+    "agent_notes": "Load Status: Successful\n\nCustomer is a repeat client with good payment history. Looking for regular freight on this lane. Prefers early morning pickups. Load confirmed for Monday pickup.",
+    "follow_up_needed": false,
+    "customer_priority": "medium",
+    "timestamp": "2025-08-19T14:45:19Z"
+  }
+]
