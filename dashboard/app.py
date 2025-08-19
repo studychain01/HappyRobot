@@ -4,14 +4,21 @@ import os, requests, pandas as pd, streamlit as st
 API_BASE = os.getenv("API_BASE", "https://happyrobot-trucking-loadsapi.onrender.com")
 API_KEY = os.getenv("API_KEY", "mysecret")
 
-# Set page config
+# Set page config with simple title
 st.set_page_config(
-    page_title="HappyRobot Trucking",
-    page_icon="🚛",
-    layout="wide"
+    page_title="Dashboard",
+    page_icon="🚛", 
+    layout="wide",
+    initial_sidebar_state="collapsed"
 )
 
-st.title("🚛 HappyRobot Trucking Platform")
+# Custom header with branding
+st.markdown("""
+<div style="padding: 1rem 0; border-bottom: 2px solid #1f77b4; margin-bottom: 2rem;">
+    <h1 style="margin: 0; color: #1f77b4;">🚛 HappyRobot Trucking Platform</h1>
+    <p style="margin: 0.5rem 0 0 0; color: #666; font-size: 1.1rem;">Load Management & Customer Conversation Dashboard</p>
+</div>
+""", unsafe_allow_html=True)
 
 # Create tabs
 tab1, tab2 = st.tabs(["📊 Loads Dashboard", "💬 Customer Conversations"])
@@ -154,38 +161,48 @@ with tab2:
 
     # Display conversations
     if conversations_data:
-        # Filter options
-        col1, col2, col3 = st.columns(3)
+        # Filter options with better styling
+        st.markdown("### 🔍 Filter & Search")
+        col1, col2 = st.columns([1, 1])
         with col1:
-            priority_filter = st.selectbox("Filter by Priority", ["All", "high", "medium", "low"])
+            mc_number_search = st.text_input("🚛 Search by MC Number", placeholder="Enter MC number...")
         with col2:
-            follow_up_filter = st.selectbox("Follow-up Needed", ["All", "Yes", "No"])
-        with col3:
-            customer_search = st.text_input("Search Customer Name", placeholder="Enter customer name...")
+            # Keep the load status filter
+            status_filter = st.selectbox("📊 Load Status", ["All", "Booked", "Not Booked", "Unknown"])
 
         # Apply filters
         filtered_conversations = conversations_data.copy()
         
-        if priority_filter != "All":
-            filtered_conversations = [c for c in filtered_conversations if c.get("customer_priority") == priority_filter]
-        
-        if follow_up_filter == "Yes":
-            filtered_conversations = [c for c in filtered_conversations if c.get("follow_up_needed")]
-        elif follow_up_filter == "No":
-            filtered_conversations = [c for c in filtered_conversations if not c.get("follow_up_needed")]
-        
-        if customer_search:
+        # Apply MC number filter
+        if mc_number_search:
             filtered_conversations = [c for c in filtered_conversations 
-                                    if customer_search.lower() in (c.get("customer_name", "") or "").lower()]
+                                    if mc_number_search.lower() in str(c.get("mc_number", "")).lower()]
+        
+        # Apply status filter using agent notes
+        if status_filter != "All":
+            if status_filter == "Booked":
+                filtered_conversations = [c for c in filtered_conversations 
+                                        if c.get('agent_notes') and 'Load Status: Successful' in c.get('agent_notes', '')]
+            elif status_filter == "Not Booked":
+                filtered_conversations = [c for c in filtered_conversations 
+                                        if c.get('agent_notes') and ('Load Status: Not' in c.get('agent_notes', '') or 'Load Status: Unsuccessful' in c.get('agent_notes', ''))]
+            elif status_filter == "Unknown":
+                filtered_conversations = [c for c in filtered_conversations 
+                                        if not (c.get('agent_notes') and 'Load Status:' in c.get('agent_notes', ''))]
 
-        st.write(f"Showing {len(filtered_conversations)} conversations")
+        # Show results count with better styling
+        st.markdown(f"### 📋 Conversations ({len(filtered_conversations)} found)")
+        st.divider()
 
         # Display conversation cards
         for conv in filtered_conversations:
-            with st.expander(f"🗣️ {conv.get('customer_name', 'Unknown Customer')} - {conv.get('conversation_id', 'N/A')}"):
-                col1, col2 = st.columns([2, 1])
+            with st.expander("•"):
+                # Create a more balanced 3-column layout
+                col1, col2, col3 = st.columns([1.2, 1, 1])
                 
                 with col1:
+                    # Conversation Content Section
+                    st.markdown("**💬 Conversation Details**")
                     if conv.get('load_requirements'):
                         st.write("**Load Requirements:**")
                         st.write(conv.get('load_requirements'))
@@ -193,75 +210,84 @@ with tab2:
                     if conv.get('agent_notes'):
                         st.write("**Agent Notes:**")
                         st.write(conv.get('agent_notes'))
+                    
+                    # Add timestamp at bottom of left column
+                    if conv.get('timestamp'):
+                        st.caption(f"🕐 {conv.get('timestamp')[:19].replace('T', ' ')}")
                 
                 with col2:
-                    # Customer details
+                    # Customer & Contact Information
+                    st.markdown("**👤 Customer Info**")
                     if conv.get('customer_phone'):
-                        st.write(f"📞 **Phone:** {conv.get('customer_phone')}")
+                        st.write(f"📞 {conv.get('customer_phone')}")
                     if conv.get('customer_email'):
-                        st.write(f"📧 **Email:** {conv.get('customer_email')}")
+                        st.write(f"📧 {conv.get('customer_email')}")
                     if conv.get('mc_number'):
-                        st.write(f"🚛 **MC Number:** {conv.get('mc_number')}")
+                        st.write(f"🚛 MC: {conv.get('mc_number')}")
                     
-                    # Load booking status - check agent_notes first, then direct field
-                    load_status = None
+                    # Load booking status from agent notes
                     if conv.get('agent_notes') and 'Load Status:' in conv.get('agent_notes', ''):
-                        import re
-                        status_match = re.search(r'Load Status: (\w+)', conv.get('agent_notes', ''))
-                        if status_match:
-                            load_status = status_match.group(1).lower()
+                        if 'Load Status: Successful' in conv.get('agent_notes', ''):
+                            st.success("✅ Load: BOOKED")
+                        elif 'Load Status: Not' in conv.get('agent_notes', '') or 'Load Status: Unsuccessful' in conv.get('agent_notes', ''):
+                            st.error("❌ Load: NOT BOOKED")
                     
-                    # Display load classification status
-                    if load_status:
-                        if load_status in ['successful', 'successfull']:
-                            st.write("✅ **Load: BOOKED**")
-                        elif load_status in ['not', 'unsuccessful', 'unsucessfull']:
-                            st.write("❌ **Load: NOT BOOKED**")
+                    # Follow-up information
+                    if conv.get('follow_up_needed'):
+                        st.warning("🔔 Follow-up Needed")
+                        if conv.get('follow_up_date'):
+                            st.write(f"📅 {conv.get('follow_up_date')}")
+                
+                with col3:
+                    # Load & Route Details
+                    st.markdown("**🚛 Load Details**")
                     
-                    # Load details
+                    # Route information with better formatting
                     if conv.get('pickup_location') or conv.get('delivery_location'):
-                        st.write("**Route:**")
+                        st.write("**📍 Route:**")
                         if conv.get('pickup_location'):
-                            st.write(f"📍 From: {conv.get('pickup_location')}")
+                            st.write(f"▶️ {conv.get('pickup_location')}")
                         if conv.get('delivery_location'):
-                            st.write(f"📍 To: {conv.get('delivery_location')}")
+                            st.write(f"🏁 {conv.get('delivery_location')}")
                     
                     if conv.get('equipment_needed'):
-                        st.write(f"**Equipment:** {conv.get('equipment_needed')}")
+                        st.write(f"**🚛 Equipment:** {conv.get('equipment_needed')}")
                     
                     if conv.get('miles'):
-                        st.write(f"🛣️ **Miles:** {conv.get('miles'):,}")
+                        st.write(f"**🛣️ Miles:** {conv.get('miles'):,}")
                     
                     if conv.get('rate_discussed'):
-                        st.write(f"**Rate Discussed:** ${conv.get('rate_discussed'):,}")
-                    
-                    # Follow-up info
-                    if conv.get('follow_up_needed'):
-                        st.write("🔔 **Follow-up Needed**")
-                        if conv.get('follow_up_date'):
-                            st.write(f"📅 Follow-up Date: {conv.get('follow_up_date')}")
-                    
-                    # Timestamp
-                    if conv.get('timestamp'):
-                        st.write(f"🕐 {conv.get('timestamp')[:19].replace('T', ' ')}")
+                        st.write(f"**💰 Rate:** ${conv.get('rate_discussed'):,}")
 
         # Summary metrics
         if conversations_data:
             st.divider()
             st.subheader("📊 Conversation Metrics")
             
-            col1, col2, col3, col4 = st.columns(4)
+            col1, col2 = st.columns(2)
             with col1:
                 st.metric("Total Conversations", len(conversations_data))
             with col2:
-                follow_ups = len([c for c in conversations_data if c.get('follow_up_needed')])
-                st.metric("Follow-ups Needed", follow_ups)
-            with col3:
-                high_priority = len([c for c in conversations_data if c.get('customer_priority') == 'high'])
-                st.metric("High Priority", high_priority)
-            with col4:
-                avg_rate = sum([c.get('rate_discussed', 0) for c in conversations_data if c.get('rate_discussed')]) / max(1, len([c for c in conversations_data if c.get('rate_discussed')]))
-                st.metric("Avg Rate Discussed", f"${avg_rate:,.0f}" if avg_rate > 0 else "N/A")
+                # Count successful vs unsuccessful loads from agent notes
+                successful_loads = len([c for c in conversations_data 
+                                      if c.get('agent_notes') and 'Load Status: Successful' in c.get('agent_notes', '')])
+                st.metric("Customer Classification", f"{successful_loads}/{len(conversations_data)}")
+            
+            # Add bar chart for load classification
+            st.subheader("Load Classification Results")
+            unsuccessful_loads = len([c for c in conversations_data 
+                                    if c.get('agent_notes') and ('Load Status: Not' in c.get('agent_notes', '') or 'Load Status: Unsuccessful' in c.get('agent_notes', ''))])
+            unknown_loads = len(conversations_data) - successful_loads - unsuccessful_loads
+            
+            # Create data for bar chart
+            import pandas as pd
+            classification_data = pd.DataFrame({
+                'Status': ['Successful', 'Unsuccessful', 'Unknown'],
+                'Count': [successful_loads, unsuccessful_loads, unknown_loads]
+            })
+            
+            # Display bar chart
+            st.bar_chart(classification_data.set_index('Status'))
 
     else:
         st.info("No customer conversations found. Your agents can start submitting conversation data using the `/conversations` API endpoint.")
