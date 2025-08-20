@@ -45,8 +45,8 @@ HappyRobot Platform
 
 ### 1. Clone & Setup
 ```bash
-git clone <repository-url>
-cd Happy-Robot
+git clone https://github.com/studychain01/HappyRobot.git
+cd HappyRobot
 pip install -r dashboard/requirements.txt
 pip install -r load_api/requirements.txt
 ```
@@ -68,6 +68,9 @@ streamlit run app.py
 ### 4. Access the Platform
 - **Dashboard**: http://localhost:8501
 - **API Documentation**: http://localhost:8000/docs
+
+### 🌐 Live Demo
+- **Live Application**: https://happyrobot-2.onrender.com/
 
 ## 📊 Components
 
