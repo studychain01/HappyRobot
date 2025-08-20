@@ -43,8 +43,19 @@ with tab1:
 
     df = pd.DataFrame(data)
 
-    st.subheader("Loads")
+    st.subheader("Available Loads")
     st.dataframe(df, use_container_width=True)
+    
+    # Booked Loads Section
+    st.divider()
+    st.subheader("Booked Loads")
+    
+    # For now, show placeholder - this will be populated when loads are booked
+    booked_df = pd.DataFrame()  # Empty for now
+    if booked_df.empty:
+        st.info("No loads have been booked yet. Booked loads will appear here when customers confirm loads.")
+    else:
+        st.dataframe(booked_df, use_container_width=True)
 
     if not df.empty:
         st.subheader("Equipment mix")
